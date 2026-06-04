@@ -10,6 +10,7 @@ from .database import SessionLocal, engine
 from . import Excel_report
 from fastapi import Depends, APIRouter
 import os
+from .routers import cdn
 import asyncio
 from pydantic import EmailStr
 from enum import Enum
@@ -36,6 +37,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(cdn.router, prefix="")
+
 
 def get_db():
     db = SessionLocal()
@@ -60,7 +63,7 @@ report_folder_path = '/root/Sansera/SanseraReports'
 @app.post("/create_shift_data/")
 async def create_shift_data(data: schemas.ShiftDataBase, db: Session = Depends(get_db)):
     db_graph_data = await crud.get_shift_data_(db, data.date_, data.Shift, data.machine_name
-                                              )
+                                               )
     if db_graph_data:
         return await crud.update_shift_data(db=db, data=data)
     return await crud.create_shift_data(db=db, data=data)
